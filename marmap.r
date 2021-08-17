@@ -2,7 +2,7 @@ library(marmap)
 library(ggplot2)
 library(scico)
 
-setwd("/Users/Corinna/Documents/PostDoc/Beinart_Lab/16S_amplicons/Meta-analysis")
+setwd("/Users/Corinna/Documents/PostDoc/Beinart_Lab/Snail_16S_amplicons/Meta-analysis")
 
 dat <- getNOAA.bathy(50, -165, 30, -30, res=4, keep=TRUE, antimeridian=TRUE)
 

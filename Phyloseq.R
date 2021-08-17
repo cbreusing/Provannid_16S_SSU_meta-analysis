@@ -10,7 +10,7 @@ library(RColorBrewer)
 library(circlize)
 library(rbiom)
 
-setwd("/Users/Corinna/Documents/PostDoc/Beinart_Lab/16S_amplicons/Meta-analysis/oligotyping")
+setwd("/Users/Corinna/Documents/PostDoc/Beinart_Lab/Snail_16S_amplicons/Meta-analysis/oligotyping")
 
 # Import biom and mapping files
 biomFile <- import_biom("oligo-table.biom", parseFunction = parse_taxonomy_default)
@@ -34,11 +34,39 @@ symbionts = prune_samples(sample_sums(phyloseq) > 1000, phyloseq)
 symbionts = filter_taxa(symbionts, function(x) sum(x) > 0, TRUE)
 symbiontstrans <- transform_sample_counts(symbionts, function(x) x/sum(x))
 
+boucheti = subset_samples(symbionts, Host == "A. boucheti")
+boucheti = filter_taxa(boucheti, function(x) sum(x) > 0, TRUE)
+kojimai = subset_samples(symbionts, Host == "A. kojimai")
+kojimai = filter_taxa(kojimai, function(x) sum(x) > 0, TRUE)
+strummeri = subset_samples(symbionts, Host == "A. strummeri")
+strummeri = filter_taxa(strummeri, function(x) sum(x) > 0, TRUE)
+hessleri = subset_samples(symbionts, Host == "A. hessleri")
+hessleri = filter_taxa(hessleri, function(x) sum(x) > 0, TRUE)
+nautilei = subset_samples(symbionts, Host == "I. nautilei")
+nautilei = filter_taxa(nautilei, function(x) sum(x) > 0, TRUE)
+
+otub <- t(otu_table(boucheti))
+otuk <- t(otu_table(kojimai))
+otus <- t(otu_table(strummeri))
+otuh <- t(otu_table(hessleri))
+otun <- t(otu_table(nautilei))
 otu <- t(otu_table(symbionts))
+
+specb <- specaccum(otub)
+speck <- specaccum(otuk)
+specs <- specaccum(otus)
+spech <- specaccum(otuh)
+specn <- specaccum(otun)
 spec <- specaccum(otu)
 
-pdf("Specaccum_filtered.pdf")
-plot(spec, ci.type="poly", col = "black", lwd=2, ci.lty=0, ci.col="grey", ci = 1.96, xlab = "# individuals", ylab = "# oligotypes")
+pdf("Specaccum_filtered_combined.pdf")
+plot(spec, col = "black", lwd=2, ci = 0, xlab = "# individuals", ylab = "# oligotypes")
+plot(specb, col = "dodgerblue1", lwd=2, add = TRUE, ci = 0)
+plot(speck, col = "red1", lwd=2, add = TRUE, ci = 0)
+plot(specs, col = "cyan4", lwd=2, add = TRUE, ci = 0)
+plot(spech, col = "darkorange", lwd=2, add = TRUE, ci = 0)
+plot(specn, col = "midnightblue", lwd=2, add = TRUE, ci = 0)
+legend("bottomright", legend=c("All species", "A. boucheti", "A. kojimai", "A. strummeri", "A. hessleri", "I. nautilei"), col=c("black", "dodgerblue1", "red1", "cyan4", "darkorange", "midnightblue"), lty=1, cex=1, text.font=c(1, 3, 3, 3, 3, 3), box.lty=0)
 dev.off()
 
 #Complete dataset
@@ -52,7 +80,7 @@ col6 <- colorRampPalette(c("mistyrose", "darkred")) (20)
 col <- c(col1, col2, col3, col4, col5, col6)
 
 pdf("Fractional_abundance_filtered.pdf", width=30, height=14)
-plot_bar(symbiontstrans, x= "Sample", fill = "Symbiont") + facet_grid(. ~ Host, scales = "free", space = "free") + geom_bar(aes(color=Symbiont, fill=Symbiont), stat='identity', position='stack') + scale_color_manual(values = col) + scale_fill_manual(values = col) + ylab("Fractional abundance") + theme_bw() + theme(axis.title = element_text(size=15, face="bold")) + theme(axis.text.x = element_blank(), axis.text.y = element_text(size=13)) + theme(legend.text = element_text(size = 13)) + theme(legend.title = element_text(size = 15, face="bold")) + theme(strip.text.x = element_blank()) + theme(legend.key = element_rect(size = 0.4)) + theme(legend.position="bottom")
+plot_bar(symbiontstrans, x= "Sample", fill = "Symbiont") + facet_grid(. ~ Host, scales = "free", space = "free") + geom_bar(aes(color=Symbiont, fill=Symbiont), stat='identity', position='stack') + scale_color_manual(values = col) + scale_fill_manual(values = col) + ylab("Fractional abundance") + theme_bw() + theme(axis.title = element_text(size=15, face="bold"), axis.text.x = element_blank(), axis.text.y = element_text(size=13), legend.text = element_text(size = 13), legend.title = element_text(size = 15, face="bold"), strip.text.x = element_blank(), legend.key = element_rect(size = 0.4), legend.position="bottom")
 dev.off()
 
 colors <- c("pink1", "dodgerblue1", "goldenrod1", "red1", "maroon4", "cyan4", "midnightblue")
@@ -61,7 +89,7 @@ colors <- c("pink1", "dodgerblue1", "goldenrod1", "red1", "maroon4", "cyan4", "m
 PCoA <- ordinate(symbiontstrans, "PCoA", "unifrac", weighted = TRUE)
 pbc1 <- plot_ordination(symbiontstrans, PCoA)
 pdf("PCoA_Unifrac_filtered.pdf")
-pbc1 + scale_fill_manual(values = colors, name="Host") + theme_classic() + geom_point(position=position_jitter(width=0, height=0), aes(fill = factor(Host)), shape=21, color="gray32", size=3) + theme(text = element_text(size = 15))
+pbc1 + scale_fill_manual(values = colors, name="Host") + theme_classic() + geom_point(position=position_jitter(width=0, height=0), aes(fill = factor(Host)), shape=21, color="gray32", size=3) + theme(text = element_text(size = 15), legend.text = element_text(face = "italic"))
 dev.off()
 
 boucheti = subset_samples(symbionts, Host == "A. boucheti")
@@ -183,5 +211,5 @@ colors2 <- c("royalblue1", "midnightblue", "goldenrod1", "red2", "salmon", "seag
 
 # Alpha diversity
 pdf("Alpha_diversity_host.pdf")
-plot_richness(symbiontstrans, x="Host", measures=c("Shannon", "Simpson")) + scale_fill_manual(values = colors2, name="Basin") + theme_bw() + geom_point(position=position_jitter(width=0, height=0), aes(fill = factor(Basin)), shape=21, color="gray32", size=3) + theme(text = element_text(size = 15)) + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) + theme(axis.text.x = element_text(face = "italic"))
+plot_richness(symbiontstrans, x="Host", measures=c("Shannon", "Simpson")) + scale_fill_manual(values = colors2, name="Basin") + theme_bw() + geom_point(position=position_jitter(width=0, height=0), aes(fill = factor(Basin)), shape=21, color="gray32", size=3) + theme(text = element_text(size = 15), axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1, face = "italic"))
 dev.off()
