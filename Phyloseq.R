@@ -60,7 +60,7 @@ specn <- specaccum(otun)
 spec <- specaccum(otu)
 
 pdf("Specaccum_filtered_combined.pdf")
-plot(spec, col = "black", lwd=2, ci = 0, xlab = "# individuals", ylab = "# oligotypes")
+plot(spec, col = "black", lwd=2, ci = 0, xlab = "# individuals", ylab = "# ASVs")
 plot(specb, col = "dodgerblue1", lwd=2, add = TRUE, ci = 0)
 plot(speck, col = "red1", lwd=2, add = TRUE, ci = 0)
 plot(specs, col = "cyan4", lwd=2, add = TRUE, ci = 0)

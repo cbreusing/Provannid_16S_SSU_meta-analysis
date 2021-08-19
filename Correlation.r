@@ -10,5 +10,5 @@ shapiro.test(data$Oligotypes)
 cor.test(data$Size, data$Oligotypes, method="spearman")
 
 pdf("Size_vs_Richness.pdf")
-ggscatter(data, x = "Size", y = "Oligotypes", add = "reg.line", conf.int = TRUE, cor.coef = TRUE, cor.method = "spearman", xlab = "Size (mm)", ylab = "Number of oligotypes")
+ggscatter(data, x = "Size", y = "Oligotypes", add = "reg.line", conf.int = TRUE, cor.coef = TRUE, cor.method = "spearman", xlab = "Size (mm)", ylab = "Number of ASVs")
 dev.off()

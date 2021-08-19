@@ -29,7 +29,7 @@ display -N 24 --generate-sets
 export LC_ALL=en_US.utf8
 export LANG=en_US.utf8
 
-source activate qiime2-2019.10
+source activate qiime2-2021.4
 
 qiime tools import --input-path snails/OLIGO-REPRESENTATIVES.fasta --output-path oligo-seqs.qza --type 'FeatureData[Sequence]'
 
@@ -37,7 +37,7 @@ qiime feature-classifier classify-sklearn --i-classifier silva-132-99-515F-926R-
 
 qiime alignment mafft --i-sequences oligo-seqs.qza --o-alignment aligned_oligos.qza
 qiime alignment mask --i-alignment aligned_oligos.qza --o-masked-alignment masked-aligned_oligos.qza
-qiime phylogeny fasttree --i-alignment masked-aligned_oligos.qza --o-tree unrooted-tree_oligos.qza
+qiime phylogeny iqtree-ultrafast-bootstrap --i-alignment masked-aligned_oligos.qza --o-tree unrooted-tree_oligos.qza --p-perturb-nni-strength 0.2 --p-stop-iter 200 --p-n-runs 5 --p-bootstrap-replicates 5000 --p-n-cores 1 --verbose
 qiime phylogeny midpoint-root --i-tree unrooted-tree_oligos.qza --o-rooted-tree rooted-tree_oligos.qza
 
 qiime tools export --input-path rooted-tree_oligos.qza --output-path oligos

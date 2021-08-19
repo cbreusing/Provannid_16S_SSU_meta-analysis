@@ -25,7 +25,7 @@ usearch11 -otutab symbionts_merged.fq -zotus zotus_symbionts.fa -sample_delim . 
 export LC_ALL=en_US.utf8
 export LANG=en_US.utf8
 
-source activate qiime2-2019.10
+source activate qiime2-2021.4
 
 biom convert -i zotu_symbionts.txt -o zotu-table.biom --to-hdf5 --table-type="OTU table"
 
@@ -39,12 +39,4 @@ qiime feature-classifier fit-classifier-naive-bayes --i-reference-reads silva_13
 
 qiime feature-classifier classify-sklearn --i-classifier silva-132-99-515F-926R-classifier.qza --i-reads zotu_seqs.qza --o-classification taxonomy.qza --p-n-jobs 1
 
-qiime alignment mafft --i-sequences zotu_seqs.qza --o-alignment aligned_symbionts.qza
-qiime alignment mask --i-alignment aligned_symbionts.qza --o-masked-alignment masked-aligned_symbionts.qza
-qiime phylogeny fasttree --i-alignment masked-aligned_symbionts.qza --o-tree unrooted-tree.qza
-qiime phylogeny midpoint-root --i-tree unrooted-tree.qza --o-rooted-tree rooted-tree.qza
-
-qiime tools export --input-path zotu-table.qza --output-path unfiltered
-qiime tools export --input-path zotu_seqs.qza --output-path unfiltered
-qiime tools export --input-path rooted-tree.qza --output-path unfiltered
 qiime tools export --input-path taxonomy.qza --output-path unfiltered
