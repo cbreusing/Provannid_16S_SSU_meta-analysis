@@ -472,10 +472,10 @@ fit2$VE.df.submodels
 pdf("LDM_screeplot2.pdf")
 par(mfrow = c(1,2))
 scree.freq2 <- c(fit2$VE.global.freq.submodels/fit2$VE.df.submodels,fit2$VE.global.freq.residuals)
-color <- c("red2", "midnightblue", "lightseagreen", rep("gray50", length(scree.freq2)-2))
+color <- c("red2", "midnightblue", "lightseagreen", rep("gray50", length(scree.freq2)-3))
 plot(scree.freq2/sum(scree.freq2), main="Frequency Scale", xlab="Component", ylab="Proportion of total sum of squares", col=color, pch=16)
 scree.tran2 <- c(fit2$VE.global.tran.submodels/fit2$VE.df.submodels,fit2$VE.global.tran.residuals)
-color <- c("red2", "midnightblue", "lightseagreen", rep("gray50", length(scree.tran2)-2))
+color <- c("red2", "midnightblue", "lightseagreen", rep("gray50", length(scree.tran2)-3))
 plot(scree.tran2/sum(scree.tran2), main="Arcsin-Root Scale", xlab="Component", ylab="", col=color, pch=16)
 dev.off()
 
