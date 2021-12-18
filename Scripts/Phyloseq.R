@@ -190,7 +190,6 @@ pb3 + scale_fill_manual(values = colorsb3, name="Vent") + theme_classic() + geom
 dev.off()
 
 
-
 colorsk <- c("royalblue", "orange", "plum4", "steelblue1", "gold", "plum3")
 colorsk2 <- c("royalblue4", "cornflowerblue", "slategray1")
 colorsk3 <- c("slateblue4", "plum", "slateblue1")
@@ -364,7 +363,6 @@ ps2 + scale_fill_manual(values = colorss2, name="Vent") + theme_classic() + geom
 dev.off()
 
 
-
 colorsh <- c("darkslategray", "darkseagreen3", "khaki", "aquamarine4", "lightgoldenrodyellow")
 
 disth <- UniFrac(hessleritrans, weighted = TRUE)
@@ -430,7 +428,7 @@ dev.off()
 
 # PERMANOVA and LDM
 sampledf <- data.frame(sample_data(symbionts))
-otudf <- otu_table(symbionts)
+otudf <- t(otu_table(symbionts))
 tree = phy_tree(symbionts)
 
 fit <- ldm(otudf|(Preservation+Extraction+Sequencing) ~ Host + Basin, data=sampledf, n.perm.max=10000, seed=12345, scale.otu.table=TRUE, dist.method="wt-unifrac", tree=tree, n.cores=4)
@@ -459,31 +457,3 @@ perm <- permanovaFL(otudf|(Preservation+Extraction+Sequencing) ~ Host + Basin, d
 
 perm$F.statistics
 perm$p.permanova
-
-fit2 <- ldm(otudf ~ Host + Basin + Preservation*Extraction*Sequencing, data=sampledf, n.perm.max=10000, seed=12345, scale.otu.table=TRUE, dist.method="wt-unifrac", tree=tree, n.cores=4)
-
-fit2$F.global.freq
-fit2$F.global.tran
-fit2$p.global.freq
-fit2$p.global.tran
-fit2$p.global.omni
-fit2$VE.df.submodels
-
-pdf("LDM_screeplot2.pdf")
-par(mfrow = c(1,2))
-scree.freq2 <- c(fit2$VE.global.freq.submodels/fit2$VE.df.submodels,fit2$VE.global.freq.residuals)
-color <- c("red2", "midnightblue", "lightseagreen", rep("gray50", length(scree.freq2)-3))
-plot(scree.freq2/sum(scree.freq2), main="Frequency Scale", xlab="Component", ylab="Proportion of total sum of squares", col=color, pch=16)
-scree.tran2 <- c(fit2$VE.global.tran.submodels/fit2$VE.df.submodels,fit2$VE.global.tran.residuals)
-color <- c("red2", "midnightblue", "lightseagreen", rep("gray50", length(scree.tran2)-3))
-plot(scree.tran2/sum(scree.tran2), main="Arcsin-Root Scale", xlab="Component", ylab="", col=color, pch=16)
-dev.off()
-
-round(scree.freq2/sum(scree.freq2)*100, 2)[1]
-round(scree.freq2/sum(scree.freq2)*100, 2)[2]
-round(scree.freq2/sum(scree.freq2)*100, 2)[3]
-
-perm2 <- permanovaFL(otudf ~ Host + Basin + Preservation*Extraction*Sequencing, data=sampledf, n.perm.max=1000, seed=12345, scale.otu.table=TRUE, dist.method="wt-unifrac", tree=tree, n.cores=4)
-
-perm2$F.statistics
-perm2$p.permanova
