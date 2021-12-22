@@ -190,6 +190,7 @@ pb3 + scale_fill_manual(values = colorsb3, name="Vent") + theme_classic() + geom
 dev.off()
 
 
+
 colorsk <- c("royalblue", "orange", "plum4", "steelblue1", "gold", "plum3")
 colorsk2 <- c("royalblue4", "cornflowerblue", "slategray1")
 colorsk3 <- c("slateblue4", "plum", "slateblue1")
@@ -363,6 +364,7 @@ ps2 + scale_fill_manual(values = colorss2, name="Vent") + theme_classic() + geom
 dev.off()
 
 
+
 colorsh <- c("darkslategray", "darkseagreen3", "khaki", "aquamarine4", "lightgoldenrodyellow")
 
 disth <- UniFrac(hessleritrans, weighted = TRUE)
@@ -431,6 +433,7 @@ sampledf <- data.frame(sample_data(symbionts))
 otudf <- t(otu_table(symbionts))
 tree = phy_tree(symbionts)
 
+# Model 1
 fit <- ldm(otudf|(Preservation+Extraction+Sequencing) ~ Host + Basin, data=sampledf, n.perm.max=10000, seed=12345, scale.otu.table=TRUE, dist.method="wt-unifrac", tree=tree, n.cores=4)
 
 fit$F.global.freq
@@ -457,3 +460,87 @@ perm <- permanovaFL(otudf|(Preservation+Extraction+Sequencing) ~ Host + Basin, d
 
 perm$F.statistics
 perm$p.permanova
+
+# Subset data
+subset <- subset_samples(symbionts, Basin == "ELSC")
+subset = subset_samples(subset, Host == "A. boucheti" | Host == "A. kojimai" | Host == "A. strummeri")
+subset = filter_taxa(subset, function(x) sum(x) > 0, TRUE)
+subsettrans <- transform_sample_counts(subset, function(x) x/sum(x))
+
+sampledf2 <- data.frame(sample_data(subset))
+otudf2 <- t(otu_table(subset))
+tree2 <- phy_tree(subset)
+
+# Model 2
+fit2 <- ldm(otudf2|(Preservation+Extraction) ~ Vent + Host, data=sampledf2, n.perm.max=10000, seed=12345, scale.otu.table=TRUE, dist.method="wt-unifrac", tree=tree2, n.cores=4)
+
+fit2$F.global.freq
+fit2$F.global.tran
+fit2$p.global.freq
+fit2$p.global.tran
+fit2$p.global.omni
+fit2$VE.df.submodels
+
+pdf("LDM_screeplot2.pdf")
+par(mfrow = c(1,2))
+scree.freq2 <- c(fit2$VE.global.freq.submodels/fit2$VE.df.submodels,fit2$VE.global.freq.residuals)
+color <- c("red2", "midnightblue", rep("gray50", length(scree.freq2)-2))
+plot(scree.freq2/sum(scree.freq2), main="Frequency Scale", xlab="Component", ylab="Proportion of total sum of squares", col=color, pch=16)
+scree.tran <- c(fit2$VE.global.tran.submodels/fit2$VE.df.submodels,fit2$VE.global.tran.residuals)
+color <- c("red2", "midnightblue", rep("gray50", length(scree.tran)-2))
+plot(scree.tran/sum(scree.tran), main="Arcsin-Root Scale", xlab="Component", ylab="", col=color, pch=16)
+dev.off()
+
+round(scree.freq2/sum(scree.freq2)*100, 2)[1]
+round(scree.freq2/sum(scree.freq2)*100, 2)[2]
+
+perm2 <- permanovaFL(otudf2|(Preservation+Extraction) ~ Vent + Host, data=sampledf2, n.perm.max=1000, seed=12345, scale.otu.table=TRUE, dist.method="wt-unifrac", tree=tree2, n.cores=4)
+
+perm2$F.statistics
+perm2$p.permanova
+
+# Model 3
+fit3 <- ldm(otudf2 ~ Preservation*Extraction + Vent + Host, data=sampledf2, n.perm.max=10000, seed=12345, scale.otu.table=TRUE, dist.method="wt-unifrac", tree=tree2, n.cores=4)
+
+fit3$F.global.freq
+fit3$F.global.tran
+fit3$p.global.freq
+fit3$p.global.tran
+fit3$p.global.omni
+fit3$VE.df.submodels
+
+pdf("LDM_screeplot3.pdf")
+par(mfrow = c(1,2))
+scree.freq3 <- c(fit3$VE.global.freq.submodels/fit3$VE.df.submodels,fit3$VE.global.freq.residuals)
+color <- c("red2", "midnightblue", "lightseagreen", rep("gray50", length(scree.freq3)-3))
+plot(scree.freq3/sum(scree.freq3), main="Frequency Scale", xlab="Component", ylab="Proportion of total sum of squares", col=color, pch=16)
+scree.tran <- c(fit3$VE.global.tran.submodels/fit3$VE.df.submodels,fit3$VE.global.tran.residuals)
+color <- c("red2", "midnightblue", "lightseagreen", rep("gray50", length(scree.tran)-3))
+plot(scree.tran/sum(scree.tran), main="Arcsin-Root Scale", xlab="Component", ylab="", col=color, pch=16)
+dev.off()
+
+round(scree.freq3/sum(scree.freq3)*100, 2)[1]
+round(scree.freq3/sum(scree.freq3)*100, 2)[2]
+round(scree.freq3/sum(scree.freq3)*100, 2)[3]
+
+perm3 <- permanovaFL(otudf2 ~ Preservation*Extraction + Vent + Host, data=sampledf2, n.perm.max=1000, seed=12345, scale.otu.table=TRUE, dist.method="wt-unifrac", tree=tree2, n.cores=4)
+
+perm3$F.statistics
+perm3$p.permanova
+
+
+distsub <- UniFrac(subsettrans, weighted = TRUE)
+ordsub <- metaMDS(distsub, k=2, trymax=1000)
+scoressub <- as.data.frame(scores(ordsub, display = "sites"))
+scoressub <- cbind(scoressub, Host = sample_data(subset)$Host, Vent = sample_data(subset)$Vent)
+pdf("NMDS_Unifrac_subset_TSS.pdf")
+psub <- ggplot(scoressub, aes(x=NMDS1, y=NMDS2, color=Host, shape=Vent))
+psub + scale_fill_manual(values = c("dodgerblue1", "red1", "cyan4"), name="Host") + scale_shape_manual(values = c(21, 22, 24), name="Vent") + theme_classic() + geom_point(position=position_jitter(width=0, height=0), aes(fill = factor(Host), shape = factor(Vent)), color="gray32", size=3) + theme(text = element_text(size = 15))
+dev.off()
+
+scoressubm <- cbind(scoressub, Preservation = sample_data(subset)$Preservation, Extraction = sample_data(subset)$Extraction)
+pdf("NMDS_Unifrac_Methods_subset_TSS.pdf")
+psub <- ggplot(scoressubm, aes(x=NMDS1, y=NMDS2, color=Extraction, shape=Preservation))
+psub + scale_fill_manual(values = c("lightseagreen", "slateblue"), name="Extraction") + scale_shape_manual(values = c(21, 24), name="Preservation") + theme_classic() + geom_point(position=position_jitter(width=0, height=0), aes(fill = factor(Extraction), shape = factor(Preservation)), color="gray32", size=3) + theme(text = element_text(size = 15))
+dev.off()
+
